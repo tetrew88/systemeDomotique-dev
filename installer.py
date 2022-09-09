@@ -3,6 +3,8 @@
 
 import os
 
+import mysql.connector
+
 from classes.installer import *
 
 
@@ -16,93 +18,94 @@ def install():
 
 	installer = Installer(scriptPath)
 	#if user installer was lauch in sudo mode
-	if os.getuid() == 0:
-		print("\n\nBienvenu dans l'installateur du système domotique.\n\n")
+	print("\n\nBienvenu dans l'installateur du système domotique.\n\n")
 
-		print("le système va télécharger les programmes et modules nécessaire\na son fonctionnement et vous demandera de remplir quelque informations\n")
+	print("le système va télécharger les programmes et modules nécessaire\na son fonctionnement et vous demandera de remplir quelque informations\n")
 
-		installChoice = installer.get_install_choice()
-		print(installChoice)
+	installChoice = installer.get_install_choice()
+	print(installChoice)
 
-		if installChoice != False and installChoice == "o":
-			print("\ninstallation des programmes nécessaire au fonctionnement du système\n\n")
+	if installChoice != False and installChoice == "o":
+		print("\ninstallation des programmes nécessaire au fonctionnement du système\n\n")
 
-			#database installation/configuration
-			installer.download_database_system()
-			installer.install_database_system()
+		#database installation/configuration
+		print("téléchargement du système de base de donnée")
+		installer.download_database_system()
+		print("installation du système de base de donnée")
+		installer.install_database_system()
 
-			rootDatabasePassword = installer.get_root_database_system_password()
+		print("\n\n")
 
-			if rootDatabasePassword != False:
-				if installer.check_database_config_file_existence():
-					print("\n\nconfiguration du compte utilisateur que va utiliser le système pour intéragire avec la base de donnée\n")
+		rootDatabasePassword = installer.get_root_database_system_password()
 
-					"""setting database username"""
-					print("commencons par le nom d'utilisateur que le système utilisera pour interagir avec la base de donnée.\n\
-						appuyer directement sur entrer pour utiliser le nom prédéfini (homeAutomationSystem)\n\n")
+		if rootDatabasePassword != False:
+			if installer.check_database_config_file_existence():
+				print("\n\nconfiguration du compte utilisateur que va utiliser le système pour intéragire avec la base de donnée\n")
 
-					systemUserName = installer.get_system_username()
+				"""setting database username"""
+				print("commencons par le nom d'utilisateur que le système utilisera pour interagir avec la base de donnée.\n\
+					appuyer directement sur entrer pour utiliser le nom prédéfini (homeAutomationSystem)\n\n")
 
-					"""setting user password"""
-					print("\n\nenssuite le mot de passe\n")
-					systemUserPassword = installer.get_system_user_password()
+				systemUserName = installer.get_system_username()
 
-					"""setting database name"""
-					print("\n\nfinisson avec le nom de la base de donnée.\n\
-						appuyer directement sur entrer pour utiliser le nom prédéfini (home)\n\n")
+				"""setting user password"""
+				print("\n\nenssuite le mot de passe\n")
+				systemUserPassword = installer.get_system_user_password()
 
-					databaseName = installer.get_database_name()
+				"""setting database name"""
+				print("\n\nfinisson avec le nom de la base de donnée.\n\
+					appuyer directement sur entrer pour utiliser le nom prédéfini (home)\n\n")
 
-					"""creating database config file"""
-					data = {}
+				databaseName = installer.get_database_name()
 
-					data["userName"] = systemUserName
-					data["password"] = systemUserPassword
-					data["databaseName"] = databaseName
+				"""creating database config file"""
+				data = {}
 
-					installer.create_database_config_file(data)
-				else:
-					pass
+				data["userName"] = systemUserName
+				data["password"] = systemUserPassword
+				data["databaseName"] = databaseName
 
-				"""mysql connexion"""
-				try:
-					databaseConnection = mysql.connector.connect(
-						host = "localHost",
-						user = "root",
-						passwd = rootDatabasePassword
-					)
-					databaseCursor =  databaseConnection.cursor(buffered=True)
-				except:
-					print("\n\nerreur de connection root a la base de donnée")
-					quit()
+				installer.create_database_config_file(data)
+			else:
+				pass
 
-				if databaseConnection != False:
-					"""user system creation"""
-					print("\n\ncréation de l'utilisateur système")
-					if installer.create_database_system_user(databaseCursor, systemUserName):
-						"""Database création"""
-						print("\n\ncréation de la base de donnée")
-						if installer.create_database(databaseCursor, databaseName):
-							#systeme user privilege attribution
-							print("\n\nattribution des droits a l'utilisateur système")
-							if installer.give_user_system_privilege(databaseCursor, systemUserName, databaseName):
-								databaseConnection.close()
-								databaseConfigured = True
-							else:
-								databaseConfigured = False
+			"""mysql connexion"""
+			try:
+				databaseConnection = mysql.connector.connect(
+					host = "localHost",
+					user = "root",
+					passwd = rootDatabasePassword
+				)
+				databaseCursor =  databaseConnection.cursor(buffered=True)
+			except:
+				print("\n\nerreur de connection root a la base de donnée")
+				quit()
+
+			if databaseConnection != False:
+				"""user system creation"""
+				print("\n\ncréation de l'utilisateur système")
+				if installer.create_database_system_user(databaseCursor, systemUserName):
+					"""Database création"""
+					print("\n\ncréation de la base de donnée")
+					if installer.create_database(databaseCursor, databaseName):
+						#systeme user privilege attribution
+						print("\n\nattribution des droits a l'utilisateur système")
+						if installer.give_user_system_privilege(databaseCursor, systemUserName, databaseName):
+							databaseConnection.close()
+							databaseConfigured = True
 						else:
 							databaseConfigured = False
 					else:
 						databaseConfigured = False
 				else:
 					databaseConfigured = False
-
 			else:
 				databaseConfigured = False
+
 		else:
-			pass
+			databaseConfigured = False
 	else:
-		print("Lancer le programme en mode superutilisateur (sudo).")
+		passs
 
 
 if __name__ == '__main__':
