@@ -71,16 +71,16 @@ def install():
 
 			"""database création"""
 			print("\n\ncréation de la base de donnée")
-			if installer.create_database(databaseCursor, databaseName):
+			if installer.create_database(databaseName):
 				"""mysql connexion"""
 				databaseConnection = mysql.connector.connect(
 					host = "localHost",
 					user = "root",
-					passwd = rootDatabasePassword
+					passwd = databaseName
 				)
 				databaseCursor =  databaseConnection.cursor(buffered=True)
 
-				if databaseConnection not False and databaseCursor not False:
+				if databaseConnection != False and databaseCursor != False:
 					"""user system creation"""
 					print("\n\ncréation de l'utilisateur système")
 					if installer.create_database_system_user(databaseCursor, systemUserName):
