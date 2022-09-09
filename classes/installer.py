@@ -234,7 +234,7 @@ class Installer:
 			method used for dowload the database system
 		"""
 
-		proc = subprocess.Popen('apt-get install -y sudo apt install mariadb-server', shell=True, stdin=None, stdout=open("/dev/null", "w"), stderr=None, executable="/bin/bash")
+		proc = subprocess.Popen('sudo apt-get install -y mariadb-server', shell=True, stdin=None, stdout=open("/dev/null", "w"), stderr=None, executable="/bin/bash")
 		proc.wait()
 
 
@@ -246,7 +246,6 @@ class Installer:
 		"""
 
 		proc = subprocess.run("sudo mysql_secure_installation", shell=True, check=True)
-		proc.wait()
 
 
 

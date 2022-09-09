@@ -28,8 +28,12 @@ def install():
 			print("\ninstallation des programmes nécessaire au fonctionnement du système\n\n")
 
 			#database installation/configuration
+			print("téléchargement du système de base de donnée")
 			installer.download_database_system()
+			print("installation du système de base de donnée")
 			installer.install_database_system()
+
+			print("\n\n")
 
 			rootDatabasePassword = installer.get_root_database_system_password()
 
@@ -65,16 +69,11 @@ def install():
 					pass
 
 				"""mysql connexion"""
-				try:
-					databaseConnection = mysql.connector.connect(
-						host = "localHost",
-						user = "root",
-						passwd = rootDatabasePassword
-					)
-					databaseCursor =  databaseConnection.cursor(buffered=True)
-				except:
-					print("\n\nerreur de connection root a la base de donnée")
-					quit()
+				databaseConnection = mysql.connector.connect(
+					host = "localHost",
+					user = "root",
+					passwd = rootDatabasePassword
+				)
 
 				if databaseConnection != False:
 					"""user system creation"""
