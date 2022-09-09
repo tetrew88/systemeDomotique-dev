@@ -183,7 +183,7 @@ class Installer:
 		return succes
 
 
-	def create_database(self, databaseCursor, databaseName):
+	def create_database(self, databaseName):
 		"""
 			method used for create the database
 
@@ -192,26 +192,8 @@ class Installer:
 				else return False
 		"""
 
-		succes = False
-
-		if check_database_existence(databaseCursor, databaseName):
-			succes = True
-		else:
-			request = "CREATE DATABASE '{}'".format(databaseName)
-			databaseCursor.execute(request)
-
-			request = "USE '{}'".format(databaseName)
-			databaseCursor.execute(request)
-
-			request = "SOURCE {}".format(scriptPath + "/configs/createHomeDatabase.sql")
-			databaseCursor.execute(request)
-
-		if check_database_existence(databaseCursor, databaseName):
-			succes = True
-		else:
-			succes = False
-
-		return succes
+		proc = subprocess.Popen('CREATE DATABASE {};'.format(databaseName), shell=True, stdin=None, stdout=open("/dev/null", "w"), stderr=None, executable="/bin/bash")
+		proc.wait()
 
 
 

@@ -69,25 +69,21 @@ def install():
 			else:
 				pass
 
-			"""mysql connexion"""
-			try:
+			"""database création"""
+			print("\n\ncréation de la base de donnée")
+			if installer.create_database(databaseCursor, databaseName):
+				"""mysql connexion"""
 				databaseConnection = mysql.connector.connect(
 					host = "localHost",
 					user = "root",
 					passwd = rootDatabasePassword
 				)
 				databaseCursor =  databaseConnection.cursor(buffered=True)
-			except:
-				print("\n\nerreur de connection root a la base de donnée")
-				quit()
 
-			if databaseConnection != False:
-				"""user system creation"""
-				print("\n\ncréation de l'utilisateur système")
-				if installer.create_database_system_user(databaseCursor, systemUserName):
-					"""Database création"""
-					print("\n\ncréation de la base de donnée")
-					if installer.create_database(databaseCursor, databaseName):
+				if databaseConnection not False and databaseCursor not False:
+					"""user system creation"""
+					print("\n\ncréation de l'utilisateur système")
+					if installer.create_database_system_user(databaseCursor, systemUserName):
 						#systeme user privilege attribution
 						print("\n\nattribution des droits a l'utilisateur système")
 						if installer.give_user_system_privilege(databaseCursor, systemUserName, databaseName):
@@ -105,7 +101,7 @@ def install():
 		else:
 			databaseConfigured = False
 	else:
-		passs
+		pass
 
 
 if __name__ == '__main__':
