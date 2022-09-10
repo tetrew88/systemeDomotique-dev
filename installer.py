@@ -39,35 +39,32 @@ def install():
 		rootDatabasePassword = installer.get_root_database_system_password()
 
 		if rootDatabasePassword != False:
-			if installer.check_database_config_file_existence():
-				print("\n\nconfiguration du compte utilisateur que va utiliser le système pour intéragire avec la base de donnée\n")
+			print("\n\nconfiguration du compte utilisateur que va utiliser le système pour intéragire avec la base de donnée\n")
 
-				"""setting database username"""
-				print("commencons par le nom d'utilisateur que le système utilisera pour interagir avec la base de donnée.\n\
-					appuyer directement sur entrer pour utiliser le nom prédéfini (homeAutomationSystem)\n\n")
+			"""setting database username"""
+			print("commencons par le nom d'utilisateur que le système utilisera pour interagir avec la base de donnée.\n\
+				appuyer directement sur entrer pour utiliser le nom prédéfini (homeAutomationSystem)\n\n")
 
-				systemUserName = installer.get_system_username()
+			systemUserName = installer.get_system_username()
 
-				"""setting user password"""
-				print("\n\nenssuite le mot de passe\n")
-				systemUserPassword = installer.get_system_user_password()
+			"""setting user password"""
+			print("\n\nenssuite le mot de passe\n")
+			systemUserPassword = installer.get_system_user_password()
 
-				"""setting database name"""
-				print("\n\nfinisson avec le nom de la base de donnée.\n\
-					appuyer directement sur entrer pour utiliser le nom prédéfini (home)\n\n")
+			"""setting database name"""
+			print("\n\nfinisson avec le nom de la base de donnée.\n\
+				appuyer directement sur entrer pour utiliser le nom prédéfini (home)\n\n")
 
-				databaseName = installer.get_database_name()
+			databaseName = installer.get_database_name()
 
-				"""creating database config file"""
-				data = {}
+			"""creating database config file"""
+			data = {}
 
-				data["userName"] = systemUserName
-				data["password"] = systemUserPassword
-				data["databaseName"] = databaseName
+			data["userName"] = systemUserName
+			data["password"] = systemUserPassword
+			data["databaseName"] = databaseName
 
-				installer.create_database_config_file(data)
-			else:
-				pass
+			installer.create_database_config_file(data)
 
 			"""database création"""
 			print("\n\ncréation de la base de donnée")
@@ -79,6 +76,8 @@ def install():
 					passwd = databaseName
 				)
 				databaseCursor =  databaseConnection.cursor(buffered=True)
+
+				input("")
 
 				if databaseConnection != False and databaseCursor != False:
 					"""user system creation"""

@@ -192,7 +192,9 @@ class Installer:
 				else return False
 		"""
 
-		proc = subprocess.Popen('sudo mysql -e"CREATE DATABASE {}"'.format(databaseName), shell=True, stdin=None, stdout=open("/dev/null", "w"), stderr=None, executable="/bin/bash")
+		request = "sudo mysql -e 'CREATE DATABASE {}'".format(databaseName)
+
+		proc = subprocess.Popen(request, shell=True, stdin=None, stdout=open("/dev/null", "w"), stderr=None, executable="/bin/bash")
 		proc.wait()
 
 
