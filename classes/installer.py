@@ -115,7 +115,7 @@ class Installer:
 			succes = False
 
 		if succes:
-			return databasePassword
+			return systemPassword
 		else:
 			return False
 
@@ -196,6 +196,11 @@ class Installer:
 
 		proc = subprocess.Popen(request, shell=True, stdin=None, stdout=open("/dev/null", "w"), stderr=None, executable="/bin/bash")
 		proc.wait()
+
+		if pipe.returncode == 0:
+			return True
+		else:
+			return False
 
 
 
