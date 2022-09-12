@@ -79,6 +79,9 @@ def install():
 				databaseCursor =  databaseConnection.cursor(buffered=True)
 
 				if databaseConnection != False and databaseCursor != False:
+					"""table creation"""
+					installer.create_database_table(databaseCursor, databaseName)
+
 					"""user system creation"""
 					print("\n\ncréation de l'utilisateur système")
 					if installer.create_database_system_user(databaseCursor, systemUserName):
