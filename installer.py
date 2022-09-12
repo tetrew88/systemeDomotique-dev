@@ -73,11 +73,10 @@ def install():
 				databaseConnection = mysql.connector.connect(
 					host = "localHost",
 					user = "root",
-					passwd = databaseName
+					passwd = rootDatabasePassword,
+					database = databaseName
 				)
 				databaseCursor =  databaseConnection.cursor(buffered=True)
-
-				input("")
 
 				if databaseConnection != False and databaseCursor != False:
 					"""user system creation"""
@@ -85,11 +84,8 @@ def install():
 					if installer.create_database_system_user(databaseCursor, systemUserName):
 						#systeme user privilege attribution
 						print("\n\nattribution des droits a l'utilisateur système")
-						if installer.give_user_system_privilege(databaseCursor, systemUserName, databaseName):
-							databaseConnection.close()
-							databaseConfigured = True
-						else:
-							databaseConfigured = False
+						installer.give_user_system_privilege(databaseCursor, systemUserName, databaseName):
+						databaseConnection.close()
 					else:
 						databaseConfigured = False
 				else:

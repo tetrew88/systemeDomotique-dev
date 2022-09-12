@@ -197,10 +197,19 @@ class Installer:
 		proc = subprocess.Popen(request, shell=True, stdin=None, stdout=open("/dev/null", "w"), stderr=None, executable="/bin/bash")
 		proc.wait()
 
-		if pipe.returncode == 0:
+		if proc.returncode == 0:
 			return True
 		else:
 			return False
+
+
+	def create_database_table(self, databaseCursor, databaseName):
+
+		request = "USE {};".format(databaseName)
+		databaseCursor.execute(request)
+		
+		request = "SOURCE {};".format(self.scriptPath + "/configs/createHomeDatabase.sql")
+		databaseCursor.execute(request)
 
 
 
