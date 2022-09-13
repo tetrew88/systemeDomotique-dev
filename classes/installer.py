@@ -158,30 +158,6 @@ class Installer:
 		return succes
 
 
-	def create_database_system_user(self, databaseCursor, username):
-		"""
-			method used for create the user of the system in the database system
-
-			return:
-				if succes return True
-				else return False
-		"""
-
-		succes = False
-
-		if self.check_user_presence_in_database_system(databaseCursor, username):
-			succes = True
-		else:
-			request = "CREATE USER '{}'@'localhost' IDENTIFIED BY '{}'".format(username, databasePassword)
-			databaseCursor.execute(request)
-
-			if self.check_user_presence_in_database_system(databaseCursor, username):
-				succes = True
-			else:
-				succes = False
-
-		return succes
-
 
 	def create_database(self, databaseName):
 		"""
@@ -214,19 +190,53 @@ class Installer:
 			return True
 		else:
 			return False
-			
 
 
-	def give_user_system_privilege(self, databaseCursor, username, databaseName):
+	def create_database_system_user(self, username, userPassword):
+		"""
+			method used for create the user of the system in the database system
+
+			return:
+				if succes return True
+				else return False
+		"""
+
+		creationRequest = "CREATE USER '{}'@'localhost' IDENTIFIED BY '{}'".format(username, userPassword)
+		request = "sudo mysql -e '{}'".format(creationRequest)
+
+		proc = subprocess.Popen(request, shell=True, stdin=None, stdout=open("/dev/null", "w"), stderr=None, executable="/bin/bash")
+		proc.wait()
+
+		if proc.returncode == 0:
+			return True
+		else:
+			return False
+
+
+
+	def give_user_system_privilege(self, username, databaseName):
 		"""
 			method used for give all privilege on the database to the system user
 		"""
 
-		request = "GRANT ALL PRIVILEGES ON {}.* TO '{}'@'localhost'".format(databaseName, username)
-		databaseCursor.execute(request)
+		attributionRequest = "GRANT ALL PRIVILEGES ON {}.* TO '{}'@'localhost'".format(databaseName, username)
+		request = "sudo mysql -e '{}'".format(attributionRequest)
 
-		request = "FLUSH PRIVILEGES"
-		databaseCursor.execute(request)
+		proc = subprocess.Popen(request, shell=True, stdin=None, stdout=open("/dev/null", "w"), stderr=None, executable="/bin/bash")
+		proc.wait()
+
+		if proc.returncode == 0:
+			request = "sudo mysql -e 'FLUSH PRIVILEGES'".format(attributionRequest)
+
+			proc = subprocess.Popen(request, shell=True, stdin=None, stdout=open("/dev/null", "w"), stderr=None, executable="/bin/bash")
+			proc.wait()
+
+			if proc.returncode == 0:
+				return True
+			else:
+				return False
+		else:
+			return False
 
 
 
