@@ -87,7 +87,7 @@ def install():
 					if installer.create_database_system_user(databaseCursor, systemUserName):
 						#systeme user privilege attribution
 						print("\n\nattribution des droits a l'utilisateur système")
-						installer.give_user_system_privilege(databaseCursor, systemUserName, databaseName):
+						installer.give_user_system_privilege(databaseCursor, systemUserName, databaseName)
 						databaseConnection.close()
 					else:
 						databaseConfigured = False

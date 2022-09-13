@@ -203,12 +203,10 @@ class Installer:
 			return False
 
 
-	def create_database_table(self, databaseCursor, databaseName):
+	def create_database_table(self, databaseName):
 
-		request = "USE {};".format(databaseName)
-		databaseCursor.execute(request)
-		
-		request = "SOURCE {};".format(self.scriptPath + "/configs/createHomeDatabase.sql")
+		fileName = self.scriptPath + '/configs/createHomeDatabase.sql'
+		request = "sudo mysql {} < {}".format(databaseName, fileName)
 		databaseCursor.execute(request)
 
 
