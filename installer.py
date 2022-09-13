@@ -69,26 +69,27 @@ def install():
 			"""database création"""
 			print("\n\ncréation de la base de donnée")
 			if installer.create_database(databaseName):
-				"""mysql connexion"""
-				databaseConnection = mysql.connector.connect(
-					host = "localHost",
-					user = "root",
-					passwd = rootDatabasePassword,
-					database = databaseName
-				)
-				databaseCursor =  databaseConnection.cursor(buffered=True)
+				"""table creation"""
+				if installer.create_database_table(databaseName):
+					"""mysql connexion"""
+					databaseConnection = mysql.connector.connect(
+						host = "localHost",
+						user = "root",
+						passwd = rootDatabasePassword,
+						database = databaseName
+					)
+					databaseCursor =  databaseConnection.cursor(buffered=True)
 
-				if databaseConnection != False and databaseCursor != False:
-					"""table creation"""
-					installer.create_database_table(databaseCursor, databaseName)
-
-					"""user system creation"""
-					print("\n\ncréation de l'utilisateur système")
-					if installer.create_database_system_user(databaseCursor, systemUserName):
-						#systeme user privilege attribution
-						print("\n\nattribution des droits a l'utilisateur système")
-						installer.give_user_system_privilege(databaseCursor, systemUserName, databaseName)
-						databaseConnection.close()
+					if databaseConnection != False and databaseCursor != False:
+						"""user system creation"""
+						print("\n\ncréation de l'utilisateur système")
+						if installer.create_database_system_user(databaseCursor, systemUserName):
+							#systeme user privilege attribution
+							print("\n\nattribution des droits a l'utilisateur système")
+							installer.give_user_system_privilege(databaseCursor, systemUserName, databaseName)
+							databaseConnection.close()
+						else:
+							databaseConfigured = False
 					else:
 						databaseConfigured = False
 				else:
