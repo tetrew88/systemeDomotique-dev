@@ -36,57 +36,53 @@ def install():
 
 		print("\n\n")
 
-		rootDatabasePassword = installer.get_root_database_system_password()
+		print("\n\nconfiguration du compte utilisateur que va utiliser le système pour intéragire avec la base de donnée\n")
 
-		if rootDatabasePassword != False:
-			print("\n\nconfiguration du compte utilisateur que va utiliser le système pour intéragire avec la base de donnée\n")
+		"""setting database username"""
+		print("commencons par le nom d'utilisateur que le système utilisera pour interagir avec la base de donnée.\nappuyer directement sur entrer pour utiliser le nom prédéfini (homeAutomationSystem)\n\n")
 
-			"""setting database username"""
-			print("commencons par le nom d'utilisateur que le système utilisera pour interagir avec la base de donnée.\n\
-				appuyer directement sur entrer pour utiliser le nom prédéfini (homeAutomationSystem)\n\n")
+		systemUserName = installer.get_system_username()
 
-			systemUserName = installer.get_system_username()
+		"""setting user password"""
+		print("\n\nenssuite le mot de passe\n")
+		systemUserPassword = installer.get_system_user_password()
 
-			"""setting user password"""
-			print("\n\nenssuite le mot de passe\n")
-			systemUserPassword = installer.get_system_user_password()
+		"""setting database name"""
+		print("\n\nfinisson avec le nom de la base de donnée.\nappuyer directement sur entrer pour utiliser le nom prédéfini (home)\n\n")
 
-			"""setting database name"""
-			print("\n\nfinisson avec le nom de la base de donnée.\n\
-				appuyer directement sur entrer pour utiliser le nom prédéfini (home)\n\n")
+		databaseName = installer.get_database_name()
 
-			databaseName = installer.get_database_name()
+		"""creating database config file"""
+		data = {}
 
-			"""creating database config file"""
-			data = {}
+		data["userName"] = systemUserName
+		data["password"] = systemUserPassword
+		data["databaseName"] = databaseName
 
-			data["userName"] = systemUserName
-			data["password"] = systemUserPassword
-			data["databaseName"] = databaseName
+		installer.create_database_config_file(data)
 
-			installer.create_database_config_file(data)
+		"""database création"""
+		print("\n\ncréation de la base de donnée")
+		if installer.create_database(databaseName):
+			"""table creation"""
+			if installer.create_database_table(databaseName):
+				"""user system creation"""
+				if installer.create_database_system_user(systemUserName):
+					#systeme user privilege attribution
+					if installer.give_user_system_privilege(systemUserName, databaseName)
+						"""mysql test connexion"""
+						databaseConnection = mysql.connector.connect(
+							host = "localHost",
+							user = "root",
+							passwd = rootDatabasePassword,
+							database = databaseName
+						)
+						databaseCursor =  databaseConnection.cursor(buffered=True)
 
-			"""database création"""
-			print("\n\ncréation de la base de donnée")
-			if installer.create_database(databaseName):
-				"""table creation"""
-				if installer.create_database_table(databaseName):
-					"""mysql connexion"""
-					databaseConnection = mysql.connector.connect(
-						host = "localHost",
-						user = "root",
-						passwd = rootDatabasePassword,
-						database = databaseName
-					)
-					databaseCursor =  databaseConnection.cursor(buffered=True)
-
-					if databaseConnection != False and databaseCursor != False:
-						"""user system creation"""
-						print("\n\ncréation de l'utilisateur système")
-						if installer.create_database_system_user(databaseCursor, systemUserName):
-							#systeme user privilege attribution
-							print("\n\nattribution des droits a l'utilisateur système")
-							installer.give_user_system_privilege(databaseCursor, systemUserName, databaseName)
+						if databaseConnection != False and databaseCursor != False:
+							"""user system creation"""
+							print("\n\ncréation de l'utilisateur système")
+							databaseConfigured = True
 							databaseConnection.close()
 						else:
 							databaseConfigured = False
@@ -96,9 +92,15 @@ def install():
 					databaseConfigured = False
 			else:
 				databaseConfigured = False
-
 		else:
 			databaseConfigured = False
+
+		if databaseConfigured == True:
+			print("\n\nBase de donnée configurer")
+		else:
+			print("\n\nerreur lors de la configuration de la base de donnée")
+			quit()
+
 	else:
 		pass
 
