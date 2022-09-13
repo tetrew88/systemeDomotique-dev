@@ -216,7 +216,7 @@ class Installer:
 			method used for give all privilege on the database to the system user
 		"""
 
-		request = "GRANT ALL PRIVILEGES ON {}.* TO '{'@'localhost'".format(databaseName, username)
+		request = "GRANT ALL PRIVILEGES ON {}.* TO '{}'@'localhost'".format(databaseName, username)
 		databaseCursor.execute(request)
 
 		request = "FLUSH PRIVILEGES"
