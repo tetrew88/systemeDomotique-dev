@@ -207,8 +207,14 @@ class Installer:
 
 		fileName = self.scriptPath + '/configs/createHomeDatabase.sql'
 		request = "sudo mysql {} < {}".format(databaseName, fileName)
-		databaseCursor.execute(request)
+		proc = subprocess.Popen(request, shell=True, stdin=None, stdout=open("/dev/null", "w"), stderr=None, executable="/bin/bash")
+		proc.wait()
 
+		if proc.returncode == 0:
+			return True
+		else:
+			return False
+			
 
 
 	def give_user_system_privilege(self, databaseCursor, username, databaseName):
