@@ -190,6 +190,7 @@ class Installer:
 		if proc.returncode == 0:
 			return True
 		else:
+			print("Erreur: {}".format(error))
 			return False
 
 
@@ -214,6 +215,7 @@ class Installer:
 		if proc.returncode == 0:
 			return True
 		else:
+			print("Erreur: {}".format(error))
 			return False
 
 
@@ -242,8 +244,10 @@ class Installer:
 			if proc.returncode == 0:
 				return True
 			else:
+				print("Erreur: {}".format(error))
 				return False
 		else:
+			print("Erreur: {}".format(error))
 			return False
 
 
@@ -263,6 +267,7 @@ class Installer:
 		if proc.returncode == 0:
 			return True
 		else:
+			print("Erreur: {}".format(error))
 			return False
 
 

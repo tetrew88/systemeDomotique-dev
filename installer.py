@@ -119,7 +119,7 @@ def install():
 		else:
 			print("\n\nerreur lors de la configuration de la base de donnée")
 
-		if databaseConfigured == True and if installer.check_database_config_file_existence():
+		if databaseConfigured == True and installer.check_database_config_file_existence():
 			succes = True
 		else:
 			succes = False
