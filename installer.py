@@ -32,7 +32,7 @@ def install():
 		print("téléchargement du système de base de donnée")
 		installer.download_database_system()
 		print("installation du système de base de donnée")
-		installer.install_database_system()
+		#installer.install_database_system()
 
 		print("\n\n")
 
@@ -67,9 +67,9 @@ def install():
 			"""table creation"""
 			if installer.create_database_table(databaseName):
 				"""user system creation"""
-				if installer.create_database_system_user(systemUserName):
+				if installer.create_database_system_user(systemUserName, systemUserPassword):
 					#systeme user privilege attribution
-					if installer.give_user_system_privilege(systemUserName, databaseName)
+					if installer.give_user_system_privilege(systemUserName, databaseName):
 						"""mysql test connexion"""
 						databaseConnection = mysql.connector.connect(
 							host = "localHost",

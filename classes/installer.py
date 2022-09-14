@@ -202,7 +202,7 @@ class Installer:
 		"""
 
 		creationRequest = "CREATE USER '{}'@'localhost' IDENTIFIED BY '{}'".format(username, userPassword)
-		request = "sudo mysql -e '{}'".format(creationRequest)
+		request = 'sudo mysql -e "{}"'.format(creationRequest)
 
 		proc = subprocess.Popen(request, shell=True, stdin=None, stdout=open("/dev/null", "w"), stderr=None, executable="/bin/bash")
 		proc.wait()
