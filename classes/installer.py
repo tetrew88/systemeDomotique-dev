@@ -54,39 +54,16 @@ class Installer:
 			return False
 
 
-	def get_root_database_system_password(self):
-		"""
-			method used for collect the root database system password
-
-			return:
-				if succes return the root database system password
-				else return False
-		"""
-
-		succes = False
-		rootDatabaseSystemPassword = ""
-
-		while rootDatabaseSystemPassword == "":
-			rootDatabaseSystemPassword = input("veuillez entrer a nouveau le mot de passe root de la base de donnée: ")
-
-		if rootDatabaseSystemPassword != "":
-			succes = True
-		else:
-			succes = False
-
-		if succes:
-			return rootDatabaseSystemPassword
-		else:
-			return False
-
-
 	def get_system_username(self):
 		"""
 			method used for collect the username of the system user
 
 			return:
-				system username
+				if succes return system username
+				else return False
 		"""
+
+		systemUsername = ""
 
 		systemUsername = input("entrer le nom d'utilisateur: ")
 		
@@ -95,7 +72,10 @@ class Installer:
 		else:
 			pass
 
-		return systemUsername
+		if systemUsername != "":
+			return systemUsername
+		else:
+			return False
 
 
 	def get_system_user_password(self):
@@ -125,13 +105,20 @@ class Installer:
 			method used for collect the databaseName
 
 			return:
-				databaseName
+				if succes return databaseName
+				else return False
 		"""
+
+		databaseName = ""
+
 		databaseName = input("entrer le nom de la base de donnée: ")
 		if databaseName == "":
 			databaseName = "Home"
 
-		return databaseName
+		if databaseName != "":
+			return databaseName
+		else:
+			return False
 
 
 
@@ -167,23 +154,37 @@ class Installer:
 				if succes return True
 				else return False
 		"""
+		succes = False
 
 		request = "sudo mysql -e 'CREATE DATABASE {}'".format(databaseName)
 
-		proc = subprocess.Popen(request, shell=True, stdin=None, stdout=open("/dev/null", "w"), stderr=None, executable="/bin/bash")
+		proc = subprocess.Popen(request, shell=True, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE, executable="/bin/bash")
+		output, error = proc.communicate()
 		proc.wait()
 
 		if proc.returncode == 0:
-			return True
+			succes = True
 		else:
-			return False
+			error = str(error.replace('\n', ''))
+
+			if 'database exists' in error:
+				succes = True
+			else:
+				print("Erreur: {}".format(error))
+				succes = False
+
+		return succes
 
 
 	def create_database_table(self, databaseName):
 
+		succes = False
+
 		fileName = self.scriptPath + '/configs/createHomeDatabase.sql'
 		request = "sudo mysql {} < {}".format(databaseName, fileName)
-		proc = subprocess.Popen(request, shell=True, stdin=None, stdout=open("/dev/null", "w"), stderr=None, executable="/bin/bash")
+		
+		proc = subprocess.Popen(request, shell=True, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE, executable="/bin/bash")
+		output, error = proc.communicate()
 		proc.wait()
 
 		if proc.returncode == 0:
@@ -201,10 +202,13 @@ class Installer:
 				else return False
 		"""
 
+		succes = False
+
 		creationRequest = "CREATE USER '{}'@'localhost' IDENTIFIED BY '{}'".format(username, userPassword)
 		request = 'sudo mysql -e "{}"'.format(creationRequest)
 
-		proc = subprocess.Popen(request, shell=True, stdin=None, stdout=open("/dev/null", "w"), stderr=None, executable="/bin/bash")
+		proc = subprocess.Popen(request, shell=True, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE, executable="/bin/bash")
+		output, error = proc.communicate()
 		proc.wait()
 
 		if proc.returncode == 0:
@@ -219,16 +223,20 @@ class Installer:
 			method used for give all privilege on the database to the system user
 		"""
 
+		succes = False
+
 		attributionRequest = "GRANT ALL PRIVILEGES ON {}.* TO '{}'@'localhost'".format(databaseName, username)
 		request = "sudo mysql -e '{}'".format(attributionRequest)
 
-		proc = subprocess.Popen(request, shell=True, stdin=None, stdout=open("/dev/null", "w"), stderr=None, executable="/bin/bash")
+		proc = subprocess.Popen(request, shell=True, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE, executable="/bin/bash")
+		output, error = proc.communicate()
 		proc.wait()
 
 		if proc.returncode == 0:
 			request = "sudo mysql -e 'FLUSH PRIVILEGES'".format(attributionRequest)
 
-			proc = subprocess.Popen(request, shell=True, stdin=None, stdout=open("/dev/null", "w"), stderr=None, executable="/bin/bash")
+			proc = subprocess.Popen(request, shell=True, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE, executable="/bin/bash")
+			output, error = proc.communicate()
 			proc.wait()
 
 			if proc.returncode == 0:
@@ -246,19 +254,16 @@ class Installer:
 			method used for dowload the database system
 		"""
 
-		proc = subprocess.Popen('sudo apt-get install -y mariadb-server', shell=True, stdin=None, stdout=open("/dev/null", "w"), stderr=None, executable="/bin/bash")
+		succes = False
+
+		proc = subprocess.Popen('sudo apt-get install -y mariadb-server', shell=True, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE, executable="/bin/bash")
+		output, error = proc.communicate()
 		proc.wait()
 
-
-
-	#install method
-	def install_database_system(self):
-		"""
-			method used for install the database system
-		"""
-
-		proc = subprocess.run("sudo mysql_secure_installation", shell=True, check=True)
-
+		if proc.returncode == 0:
+			return True
+		else:
+			return False
 
 
 	#checking method
@@ -278,49 +283,6 @@ class Installer:
 				pass
 			succes = True
 		except IOError:
-			succes = False
-
-		return succes
-
-
-	def check_user_presence_in_database_system(self, databaseCursor, username):
-		"""
-			method used for check the presence of the system user in the database system
-
-			return:
-				if the user was present return True
-				else return False
-		"""
-
-		request = "SELECT * FROM users WHERE username='{}'".format(username)
-			
-		databaseCursor.execute(request)
-		response = databaseCursor.fetchall()
-
-		if len(response) > 0:
-			succes = True
-		else:
-			succes = False
-
-
-	def check_database_existence(self, databaseCursor, username):
-		"""
-			method used for check the existence of the database
-
-			return:
-				if database exist return True
-				else return False
-		"""
-
-		succes = False
-
-		request = "SHOW DATABASES LIKE '{}'".format(databaseName)
-		databaseCursor.execute(request)
-		response = databaseCursor.fetchall()
-
-		if len(response) > 0:
-			succes = True
-		else:
 			succes = False
 
 		return succes
