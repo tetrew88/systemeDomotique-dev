@@ -135,7 +135,7 @@ class Installer:
 		succes = False
 
 		try:
-			with open(databaseConfigFilePath, 'w') as f:
+			with open(self.databaseConfigFilePath, 'w') as f:
 				json.dump(data, f, indent=4)
 
 			succes = True
@@ -190,7 +190,6 @@ class Installer:
 		if proc.returncode == 0:
 			return True
 		else:
-			print("Erreur: {}".format(error))
 			return False
 
 
