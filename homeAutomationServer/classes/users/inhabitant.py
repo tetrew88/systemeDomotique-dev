@@ -13,6 +13,11 @@ class Inhabitant(User):
                 password: password of the inhabitant
 
             property:
+                profilId: profil id of the user
+                lastname: lastname of the user
+                firstname: firstname of the user
+                gender: gender of the user
+                date of birth: date of birth of the user
 
             methods:
             	serialize (allows to transform the class in dict for json use)

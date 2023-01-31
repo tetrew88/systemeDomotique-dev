@@ -14,7 +14,7 @@ class User:
                 profilId: profil id of the user
                 lastname: lastname of the user
                 firstname: firstname of the user
-                sexe: sexe of the user
+                gender: gender of the user
                 date of birth: date of birth of the user
 
             methods:

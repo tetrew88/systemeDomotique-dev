@@ -84,6 +84,11 @@ class TestDatabaseInstaller:
 
 
     def test_databaseName_property(self):
+        """
+            1.test if method return the good values
+            2.test if methid detect error in dictionnary reading
+            3.test if method return false if error
+        """
         open_mock = mock_open()
         jsonMock = MagicMock( side_effect = [ { "systemUserName": "test" } ] )
 
@@ -102,6 +107,12 @@ class TestDatabaseInstaller:
 
     
     def test_password_property(self):
+        """
+            1.test if method return the good values
+            2.test if methid detect error in dictionnary reading
+            3.test if method return false if error
+        """
+        
         open_mock = mock_open()
         jsonMock = MagicMock( side_effect = [ { "systemUserPassword": "test" } ] )
 
@@ -121,13 +132,22 @@ class TestDatabaseInstaller:
 
     
     def test_connection(self):
+        """
+            1.test if method return True if succes
+            2.test if method return succes if connection was already established
+            3.test if methid detect error during connection
+            4.test if method detect bas cursor
+        """
+        
         self.homeDatabase.db_connection = False
         self.homeDatabase.db_cursor = False
+        #test if method return True if succes
         with mock.patch("mysql.connector.connect") as mockDatabaseConnection:
             mockDatabaseConnection.return_value = FakeSuccesConnection()
 
             assert self.homeDatabase.connect() == True
 
+        #test if method return succes if connection was already established
         self.homeDatabase.db_connection = FakeSuccesConnection()
         self.homeDatabase.db_cursor = self.homeDatabase.db_connection.cursor(buffered=True)
         assert self.homeDatabase.connect() == True
@@ -135,6 +155,7 @@ class TestDatabaseInstaller:
 
         self.homeDatabase.db_connection = False
         self.homeDatabase.db_cursor = False
+        #test if methid detect error during connection
         with mock.patch("mysql.connector.connect") as mockDatabaseConnection:
             mockDatabaseConnection.return_value = FakeFailConnection()
 
@@ -142,6 +163,7 @@ class TestDatabaseInstaller:
 
         self.homeDatabase.db_connection = False
         self.homeDatabase.db_cursor = False
+        #test if method detect bas cursor
         with mock.patch("mysql.connector.connect") as mockDatabaseConnection:
             mockDatabaseConnection.return_value = False
 
@@ -149,29 +171,56 @@ class TestDatabaseInstaller:
 
 
     def test_disconnection(self):
+        """
+            1.test if method return true if succes
+            2.test if method return true if connection was already disconnected
+            3.test if method detect error during disconnection
+        """
+        
+        #test if method return true if succes
         self.homeDatabase.db_connection = FakeSuccesConnection()
         assert self.homeDatabase.disconnect() == True
 
+        #test if method return true if connection was already disconnected
         self.homeDatabase.db_connection = False
         assert self.homeDatabase.disconnect() == True
 
+        #test if method detect error during disconnection
         self.homeDatabase.db_connection = FakeFailConnection()
         assert self.homeDatabase.disconnect() == False
 
 
     def test_commiting_change(self):
+        """
+            1.test if method return True if succes
+            2.test if method detect error durring connection
+            3.test if method detect error durring committing
+        """
+
+        #test if method return True if succes
         self.homeDatabase.db_connection = FakeSuccesConnection()
         assert self.homeDatabase.commit_change() == True
 
+        #test if method detect error durring connection
         self.homeDatabase.db_connection = False
         assert self.homeDatabase.commit_change() == False
 
+        #test if method detect error durring committing
         self.homeDatabase.db_connection = FakeFailConnection()
         assert self.homeDatabase.commit_change() == False
 
 
 
     def test_getting_users_list(self):
+        """
+            1.test if method return good type of data
+            2.test if method detect error during database connection
+            3.test if method detect error during request execution
+            4.test if method during getting request answer
+            5.test if method detect error during getting profil
+        """
+        
+        #test if method return good type of data
         with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
             mockedDatabaseConnection.return_value = True
             self.homeDatabase.db_cursor = FakeSuccesCursor()
@@ -195,7 +244,6 @@ class TestDatabaseInstaller:
                 for user in usersList:
                     assert isinstance(user, User)
 
-
         with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
             mockedDatabaseConnection.return_value = True
             self.homeDatabase.db_cursor = FakeSuccesCursor()
@@ -204,6 +252,7 @@ class TestDatabaseInstaller:
             assert self.homeDatabase.get_users_list() == []
 
 
+        #test if method detect error during database connection
         with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
             mockedDatabaseConnection.return_value = False
             self.homeDatabase.db_cursor = FakeSuccesCursor()
@@ -220,6 +269,7 @@ class TestDatabaseInstaller:
                 assert self.homeDatabase.get_users_list() == False
 
         
+        #test if method detect error during request execution
         with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
             mockedDatabaseConnection.return_value = True
             self.homeDatabase.db_cursor = FakeFailCursorExecute()
@@ -229,7 +279,7 @@ class TestDatabaseInstaller:
 
                 assert self.homeDatabase.get_users_list() == False
 
-        
+        #test if method during request answer captation
         with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
             mockedDatabaseConnection.return_value = True
             self.homeDatabase.db_cursor = FakeFailCursorFetchall()
@@ -239,7 +289,8 @@ class TestDatabaseInstaller:
 
                 assert self.homeDatabase.get_users_list() == False
 
-        
+
+        #test if method detect error during getting profil
         with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
             mockedDatabaseConnection.return_value = True
             self.homeDatabase.db_cursor = FakeSuccesCursor()
@@ -257,6 +308,14 @@ class TestDatabaseInstaller:
 
 
     def test_getting_profils_list(self):
+        """
+            1.test if method return good type of data
+            2.test if method detect database error connection
+            3.test if method detect error during request execution
+            4.test if method during getting request answer
+        """
+        
+        #test if method return good type of data
         with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
             mockedDatabaseConnection.return_value = True
             self.homeDatabase.db_cursor = FakeSuccesCursor()
@@ -270,7 +329,6 @@ class TestDatabaseInstaller:
 
             for profil in profilsList:
                     assert isinstance(profil, Profil)
-
         
         with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
             mockedDatabaseConnection.return_value = True
@@ -280,6 +338,7 @@ class TestDatabaseInstaller:
             assert self.homeDatabase.get_profils_list() == []
 
 
+        #test if method detect database error connection
         with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
             mockedDatabaseConnection.return_value = False
             self.homeDatabase.db_cursor = FakeSuccesCursor()
@@ -287,6 +346,7 @@ class TestDatabaseInstaller:
             assert self.homeDatabase.get_profils_list() == False
 
 
+        #test if method detect error during request execution
         with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
             mockedDatabaseConnection.return_value = True
             self.homeDatabase.db_cursor = FakeFailCursorExecute()
@@ -294,6 +354,7 @@ class TestDatabaseInstaller:
             assert self.homeDatabase.get_profils_list() == False
 
 
+        #test if method during getting request answer
         with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
             mockedDatabaseConnection.return_value = True
             self.homeDatabase.db_cursor = FakeFailCursorFetchall()
@@ -302,6 +363,15 @@ class TestDatabaseInstaller:
 
 
     def test_getting_inhabitant_List(self):
+        """
+            1.test if method return good type of data
+            2.test if method detect error during database connection
+            3.test if method detect error during request execution
+            4.test if method during getting request answer
+            5.test if method detect error during getting profil
+        """
+        
+        #test if method return good type of data
         with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
             mockedDatabaseConnection.return_value = True
             self.homeDatabase.db_cursor = FakeSuccesCursor()
@@ -323,7 +393,6 @@ class TestDatabaseInstaller:
                 for inhabitant in inhabitantList:
                     assert isinstance(inhabitant, Inhabitant)
 
-
         with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
             mockedDatabaseConnection.return_value = True
             self.homeDatabase.db_cursor = FakeSuccesCursor()
@@ -332,6 +401,7 @@ class TestDatabaseInstaller:
             assert self.homeDatabase.get_inhabitant_List() == []
 
 
+        #test if method detect error during database connection
         with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
             mockedDatabaseConnection.return_value = False
             self.homeDatabase.db_cursor = FakeSuccesCursor()
@@ -347,6 +417,7 @@ class TestDatabaseInstaller:
                 assert self.homeDatabase.get_inhabitant_List() == False
 
         
+        #test if method detect error during request execution
         with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
             mockedDatabaseConnection.return_value = True
             self.homeDatabase.db_cursor = FakeFailCursorExecute()
@@ -357,6 +428,7 @@ class TestDatabaseInstaller:
                 assert self.homeDatabase.get_inhabitant_List() == False
 
         
+        #test if method during getting request answer
         with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
             mockedDatabaseConnection.return_value = True
             self.homeDatabase.db_cursor = FakeFailCursorFetchall()
@@ -367,6 +439,7 @@ class TestDatabaseInstaller:
                 assert self.homeDatabase.get_inhabitant_List() == False
 
         
+        #test if method detect error during getting profil
         with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
             mockedDatabaseConnection.return_value = True
             self.homeDatabase.db_cursor = FakeSuccesCursor()
@@ -382,6 +455,15 @@ class TestDatabaseInstaller:
 
             
     def test_getting_guest_list(self):
+        """
+            1.test if method return good type of data
+            2.test if method detect error during database connection
+            3.test if method detect error during request execution
+            4.test if method during getting request answer
+            5.test if method detect error during getting profil
+        """
+
+        #test if method return good type of data
         with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
             mockedDatabaseConnection.return_value = True
             self.homeDatabase.db_cursor = FakeSuccesCursor()
@@ -397,7 +479,6 @@ class TestDatabaseInstaller:
                 guestList = self.homeDatabase.get_guest_list()
                 assert isinstance(guestList[0], Guest)
 
-
         with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
             mockedDatabaseConnection.return_value = True
             self.homeDatabase.db_cursor = FakeSuccesCursor()
@@ -406,6 +487,7 @@ class TestDatabaseInstaller:
             assert self.homeDatabase.get_guest_list() == []
 
 
+        #test if method detect error during database connection
         with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
             mockedDatabaseConnection.return_value = False
             self.homeDatabase.db_cursor = FakeSuccesCursor()
@@ -420,6 +502,7 @@ class TestDatabaseInstaller:
                 assert self.homeDatabase.get_guest_list() == False
 
         
+        #test if method detect error during request execution
         with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
             mockedDatabaseConnection.return_value = True
             self.homeDatabase.db_cursor = FakeFailCursorExecute()
@@ -430,6 +513,7 @@ class TestDatabaseInstaller:
                 assert self.homeDatabase.get_guest_list() == False
 
         
+        #test if method during getting request answer
         with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
             mockedDatabaseConnection.return_value = True
             self.homeDatabase.db_cursor = FakeFailCursorFetchall()
@@ -440,6 +524,7 @@ class TestDatabaseInstaller:
                 assert self.homeDatabase.get_guest_list() == False
 
         
+        #test if method detect error during getting profil
         with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
             mockedDatabaseConnection.return_value = True
             self.homeDatabase.db_cursor = FakeSuccesCursor()
@@ -453,6 +538,15 @@ class TestDatabaseInstaller:
 
 
     def test_getting_administrator_list(self):
+        """
+            1.test if method return good type of data
+            2.test if method detect error during database connection
+            3.test if method detect error during request execution
+            4.test if method during getting request answer
+            5.test if method detect error during getting profil
+        """
+
+        #test if method return good type of data
         with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
             mockedDatabaseConnection.return_value = True
             self.homeDatabase.db_cursor = FakeSuccesCursor()
@@ -468,7 +562,6 @@ class TestDatabaseInstaller:
                 adminList = self.homeDatabase.get_administrator_list()
                 assert isinstance(adminList[0], Administrator)
 
-
         with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
             mockedDatabaseConnection.return_value = True
             self.homeDatabase.db_cursor = FakeSuccesCursor()
@@ -477,6 +570,7 @@ class TestDatabaseInstaller:
             assert self.homeDatabase.get_administrator_list() == []
 
 
+        #test if method detect error during database connection
         with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
             mockedDatabaseConnection.return_value = False
             self.homeDatabase.db_cursor = FakeSuccesCursor()
@@ -491,6 +585,7 @@ class TestDatabaseInstaller:
                 assert self.homeDatabase.get_administrator_list() == False
 
         
+        #test if method detect error during request execution
         with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
             mockedDatabaseConnection.return_value = True
             self.homeDatabase.db_cursor = FakeFailCursorExecute()
@@ -501,6 +596,7 @@ class TestDatabaseInstaller:
                 assert self.homeDatabase.get_administrator_list() == False
 
         
+        #test if method during getting request answer
         with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
             mockedDatabaseConnection.return_value = True
             self.homeDatabase.db_cursor = FakeFailCursorFetchall()
@@ -511,6 +607,7 @@ class TestDatabaseInstaller:
                 assert self.homeDatabase.get_administrator_list() == False
 
         
+        #test if method detect error during getting profil
         with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
             mockedDatabaseConnection.return_value = True
             self.homeDatabase.db_cursor = FakeSuccesCursor()
@@ -524,6 +621,15 @@ class TestDatabaseInstaller:
 
 
     def test_getting_profil_by_id(self):
+        """
+            1.test if method return good type of data
+            2.test if method detect parametters error
+            3.test if method detect database connection error
+            4.test if method detect error during request execution
+            5.test if method during getting request answer
+        """
+
+        #test if method return good type of data
         with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
             mockedDatabaseConnection.return_value = True
             self.homeDatabase.db_cursor = FakeSuccesCursor()
@@ -534,6 +640,7 @@ class TestDatabaseInstaller:
             assert isinstance(self.homeDatabase.get_profil_by_id(1), Profil) == True
 
 
+        #test if method detect parametters error
         with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:     
             mockedDatabaseConnection.return_value = True
             self.homeDatabase.db_cursor = FakeSuccesCursor()
@@ -542,6 +649,7 @@ class TestDatabaseInstaller:
             assert self.homeDatabase.get_profil_by_id("1") == False
 
 
+        #test if method detect database connection error
         with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
             mockedDatabaseConnection.return_value = False
             self.homeDatabase.db_cursor = FakeSuccesCursor()
@@ -550,6 +658,7 @@ class TestDatabaseInstaller:
             assert self.homeDatabase.get_profil_by_id(1) == False
 
         
+        #test if method detect error during request execution
         with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
             mockedDatabaseConnection.return_value = True
             self.homeDatabase.db_cursor = FakeFailCursorExecute()
@@ -557,6 +666,7 @@ class TestDatabaseInstaller:
             assert self.homeDatabase.get_profil_by_id(1) == False
 
         
+        #test if method during getting request answer
         with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
             mockedDatabaseConnection.return_value = True
             self.homeDatabase.db_cursor = FakeFailCursorFetchall()
@@ -566,6 +676,18 @@ class TestDatabaseInstaller:
 
 
     def test_adding_user(self):
+        """
+            1.test if method return True if succes
+            2.test if method detect parametters error
+            3.test if method detect error during adding profil
+            4.test if method detect error during database connection
+            5.test if method detect error during request execution
+            6.test if method detect error durring getting lastrowId
+            7.test if method detect error during committing change
+            8.test if method detect new user not found in user list
+        """
+
+        #test if method return True if succes
         with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.add_profil') as mockedAddingProfil:
             mockedAddingProfil.return_value = 1
             
@@ -583,122 +705,140 @@ class TestDatabaseInstaller:
                         assert self.homeDatabase.add_user("donovan", "maurice", "m", "26/09/1994", "admin", "inhabitant", "tetrew", "0000") == True
 
 
-            assert self.homeDatabase.add_user(1, "maurice", "m", "26/09/1994", "admin", "inhabitant", "tetrew", "0000") == False
-            assert self.homeDatabase.add_user("donovan", 1, "m", "26/09/1994", "admin", "inhabitant", "tetrew", "0000") == False
-            assert self.homeDatabase.add_user("donovan", "maurice", 1, "26/09/1994", "admin", "inhabitant", "tetrew", "0000") == False
-            assert self.homeDatabase.add_user("donovan", "maurice", "g", "26/09/1994", "admin", "inhabitant", "tetrew", "0000") == False
-            assert self.homeDatabase.add_user("donovan", "maurice", "m", 1, "admin", "inhabitant", "tetrew", "0000") == False
-            assert self.homeDatabase.add_user("donovan", "maurice", "m", "26/09/1994", 1, "inhabitant", "tetrew", "0000") == False
-            assert self.homeDatabase.add_user("donovan", "maurice", "m", "26/09/1994", "random", "inhabitant", "tetrew", "0000") == False
-            assert self.homeDatabase.add_user("donovan", "maurice", "m", "26/09/1994", "admin", 1, "tetrew", "0000") == False
-            assert self.homeDatabase.add_user("donovan", "maurice", "m", "26/09/1994", "admin", "random", "tetrew", "0000") == False
-            assert self.homeDatabase.add_user("donovan", "maurice", "m", "26/09/1994", "admin", "inhabitant", 1, "0000") == False
-            assert self.homeDatabase.add_user("donovan", "maurice", "m", "26/09/1994", "admin", "inhabitant", "tetrew", 1) == False
+        #test if method detect parametters error
+        assert self.homeDatabase.add_user(1, "maurice", "m", "26/09/1994", "admin", "inhabitant", "tetrew", "0000") == False
+        assert self.homeDatabase.add_user("donovan", 1, "m", "26/09/1994", "admin", "inhabitant", "tetrew", "0000") == False
+        assert self.homeDatabase.add_user("donovan", "maurice", 1, "26/09/1994", "admin", "inhabitant", "tetrew", "0000") == False
+        assert self.homeDatabase.add_user("donovan", "maurice", "g", "26/09/1994", "admin", "inhabitant", "tetrew", "0000") == False
+        assert self.homeDatabase.add_user("donovan", "maurice", "m", 1, "admin", "inhabitant", "tetrew", "0000") == False
+        assert self.homeDatabase.add_user("donovan", "maurice", "m", "26/09/1994", 1, "inhabitant", "tetrew", "0000") == False
+        assert self.homeDatabase.add_user("donovan", "maurice", "m", "26/09/1994", "random", "inhabitant", "tetrew", "0000") == False
+        assert self.homeDatabase.add_user("donovan", "maurice", "m", "26/09/1994", "admin", 1, "tetrew", "0000") == False
+        assert self.homeDatabase.add_user("donovan", "maurice", "m", "26/09/1994", "admin", "random", "tetrew", "0000") == False
+        assert self.homeDatabase.add_user("donovan", "maurice", "m", "26/09/1994", "admin", "inhabitant", 1, "0000") == False
+        assert self.homeDatabase.add_user("donovan", "maurice", "m", "26/09/1994", "admin", "inhabitant", "tetrew", 1) == False
 
 
-            with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.add_profil') as mockedAddingProfil:
-                mockedAddingProfil.return_value = False
+        #test if method detect error during adding profil
+        with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.add_profil') as mockedAddingProfil:
+            mockedAddingProfil.return_value = False
             
-                with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
-                    mockedDatabaseConnection.return_value = True
+            with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
+                mockedDatabaseConnection.return_value = True
 
-                    self.homeDatabase.db_cursor = FakeSuccesCursor()
+                self.homeDatabase.db_cursor = FakeSuccesCursor()
 
-                    with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.commit_change') as mockedCommitingChange:
-                        mockedCommitingChange.return_value = True
+                with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.commit_change') as mockedCommitingChange:
+                    mockedCommitingChange.return_value = True
 
-                        with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.get_users_list') as mockedGettingUsersList:
-                            mockedGettingUsersList.return_value = [Administrator(1, Profil(1, "donovan", "maurice", "m", "26/09/1994"), "tetrew" , "0000")]
+                    with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.get_users_list') as mockedGettingUsersList:
+                        mockedGettingUsersList.return_value = [Administrator(1, Profil(1, "donovan", "maurice", "m", "26/09/1994"), "tetrew" , "0000")]
 
-                            assert self.homeDatabase.add_user("donovan", "maurice", "m", "26/09/1994", "admin", "inhabitant", "tetrew", "0000") == False
+                        assert self.homeDatabase.add_user("donovan", "maurice", "m", "26/09/1994", "admin", "inhabitant", "tetrew", "0000") == False
 
 
-            with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.add_profil') as mockedAddingProfil:
-                mockedAddingProfil.return_value = True
+        #test if method detect error during database connection
+        with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.add_profil') as mockedAddingProfil:
+            mockedAddingProfil.return_value = True
             
-                with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
-                    mockedDatabaseConnection.return_value = False
+            with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
+                mockedDatabaseConnection.return_value = False
 
-                    self.homeDatabase.db_cursor = FakeSuccesCursor()
+                self.homeDatabase.db_cursor = FakeSuccesCursor()
 
-                    with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.commit_change') as mockedCommitingChange:
-                        mockedCommitingChange.return_value = True
+                with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.commit_change') as mockedCommitingChange:
+                    mockedCommitingChange.return_value = True
 
-                        with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.get_users_list') as mockedGettingUsersList:
-                            mockedGettingUsersList.return_value = [Administrator(1, Profil(1, "donovan", "maurice", "m", "26/09/1994"), "tetrew" , "0000")]
+                    with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.get_users_list') as mockedGettingUsersList:
+                        mockedGettingUsersList.return_value = [Administrator(1, Profil(1, "donovan", "maurice", "m", "26/09/1994"), "tetrew" , "0000")]
 
-                            assert self.homeDatabase.add_user("donovan", "maurice", "m", "26/09/1994", "admin", "inhabitant", "tetrew", "0000") == False
+                        assert self.homeDatabase.add_user("donovan", "maurice", "m", "26/09/1994", "admin", "inhabitant", "tetrew", "0000") == False
 
 
-            with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.add_profil') as mockedAddingProfil:
-                mockedAddingProfil.return_value = True
+        #test if method detect error during request execution
+        with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.add_profil') as mockedAddingProfil:
+            mockedAddingProfil.return_value = True
             
-                with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
-                    mockedDatabaseConnection.return_value = True
+            with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
+                mockedDatabaseConnection.return_value = True
 
-                    self.homeDatabase.db_cursor = FakeFailCursorExecute()
+                self.homeDatabase.db_cursor = FakeFailCursorExecute()
 
-                    with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.commit_change') as mockedCommitingChange:
-                        mockedCommitingChange.return_value = True
+                with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.commit_change') as mockedCommitingChange:
+                    mockedCommitingChange.return_value = True
 
-                        with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.get_users_list') as mockedGettingUsersList:
-                            mockedGettingUsersList.return_value = [Administrator(1, Profil(1, "donovan", "maurice", "m", "26/09/1994"), "tetrew" , "0000")]
+                    with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.get_users_list') as mockedGettingUsersList:
+                        mockedGettingUsersList.return_value = [Administrator(1, Profil(1, "donovan", "maurice", "m", "26/09/1994"), "tetrew" , "0000")]
 
-                            assert self.homeDatabase.add_user("donovan", "maurice", "m", "26/09/1994", "admin", "inhabitant", "tetrew", "0000") == False
+                        assert self.homeDatabase.add_user("donovan", "maurice", "m", "26/09/1994", "admin", "inhabitant", "tetrew", "0000") == False
 
 
-            with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.add_profil') as mockedAddingProfil:
-                mockedAddingProfil.return_value = True
+        #test if method detect error durring getting lastrowId
+        with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.add_profil') as mockedAddingProfil:
+            mockedAddingProfil.return_value = True
             
-                with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
-                    mockedDatabaseConnection.return_value = True
+            with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
+                mockedDatabaseConnection.return_value = True
 
-                    self.homeDatabase.db_cursor = FakeFailCursorLastrowId()
+                self.homeDatabase.db_cursor = FakeFailCursorLastrowId()
 
-                    with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.commit_change') as mockedCommitingChange:
-                        mockedCommitingChange.return_value = True
+                with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.commit_change') as mockedCommitingChange:
+                    mockedCommitingChange.return_value = True
 
-                        with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.get_users_list') as mockedGettingUsersList:
-                            mockedGettingUsersList.return_value = [Administrator(1, Profil(1, "donovan", "maurice", "m", "26/09/1994"), "tetrew" , "0000")]
+                    with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.get_users_list') as mockedGettingUsersList:
+                        mockedGettingUsersList.return_value = [Administrator(1, Profil(1, "donovan", "maurice", "m", "26/09/1994"), "tetrew" , "0000")]
 
-                            assert self.homeDatabase.add_user("donovan", "maurice", "m", "26/09/1994", "admin", "inhabitant", "tetrew", "0000") == False
+                        assert self.homeDatabase.add_user("donovan", "maurice", "m", "26/09/1994", "admin", "inhabitant", "tetrew", "0000") == False
 
 
-            with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.add_profil') as mockedAddingProfil:
-                mockedAddingProfil.return_value = True
+        #test if method detect error during committing change
+        with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.add_profil') as mockedAddingProfil:
+            mockedAddingProfil.return_value = True
             
-                with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
-                    mockedDatabaseConnection.return_value = True
+            with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
+                mockedDatabaseConnection.return_value = True
 
-                    self.homeDatabase.db_cursor = FakeSuccesCursor()
+                self.homeDatabase.db_cursor = FakeSuccesCursor()
 
-                    with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.commit_change') as mockedCommitingChange:
-                        mockedCommitingChange.return_value = False
+                with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.commit_change') as mockedCommitingChange:
+                    mockedCommitingChange.return_value = False
 
-                        with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.get_users_list') as mockedGettingUsersList:
-                            mockedGettingUsersList.return_value = [Administrator(1, Profil(1, "donovan", "maurice", "m", "26/09/1994"), "tetrew" , "0000")]
+                    with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.get_users_list') as mockedGettingUsersList:
+                        mockedGettingUsersList.return_value = [Administrator(1, Profil(1, "donovan", "maurice", "m", "26/09/1994"), "tetrew" , "0000")]
 
-                            assert self.homeDatabase.add_user("donovan", "maurice", "m", "26/09/1994", "admin", "inhabitant", "tetrew", "0000") == False
+                        assert self.homeDatabase.add_user("donovan", "maurice", "m", "26/09/1994", "admin", "inhabitant", "tetrew", "0000") == False
 
 
-            with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.add_profil') as mockedAddingProfil:
-                mockedAddingProfil.return_value = True
+        #test if method detect new user not found in user list
+        with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.add_profil') as mockedAddingProfil:
+            mockedAddingProfil.return_value = True
             
-                with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
-                    mockedDatabaseConnection.return_value = True
+            with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
+                mockedDatabaseConnection.return_value = True
 
-                    self.homeDatabase.db_cursor = FakeSuccesCursor()
+                self.homeDatabase.db_cursor = FakeSuccesCursor()
 
-                    with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.commit_change') as mockedCommitingChange:
-                        mockedCommitingChange.return_value = True
+                with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.commit_change') as mockedCommitingChange:
+                    mockedCommitingChange.return_value = True
 
-                        with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.get_users_list') as mockedGettingUsersList:
-                            mockedGettingUsersList.return_value = []
+                    with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.get_users_list') as mockedGettingUsersList:
+                        mockedGettingUsersList.return_value = []
 
-                            assert self.homeDatabase.add_user("donovan", "maurice", "m", "26/09/1994", "admin", "inhabitant", "tetrew", "0000") == False
+                        assert self.homeDatabase.add_user("donovan", "maurice", "m", "26/09/1994", "admin", "inhabitant", "tetrew", "0000") == False
 
 
     def test_adding_profil(self):
+        """
+            1.test if method return True if succes
+            2.test if method detect parametters error
+            3.test if method detect error during database connection
+            4.test if method detect error during request execution
+            5.test if method detect error durring getting lastrowId
+            6.test if method detect error during committing change
+            7.test if method detect new profil not found in profil list
+        """
+
+        #test if method return True if succes
         with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
             mockedDatabaseConnection.return_value = True
 
@@ -712,12 +852,14 @@ class TestDatabaseInstaller:
 
                     assert self.homeDatabase.add_profil("donovan", "maurice", "m", "26/09/1994") == True
 
+        #test if method detect parametters error
         assert self.homeDatabase.add_profil(1, "maurice", "m", "26/09/1994") == False
         assert self.homeDatabase.add_profil("donovan", 1, "m", "26/09/1994") == False
         assert self.homeDatabase.add_profil("donovan", "maurice", 1, "26/09/1994") == False
         assert self.homeDatabase.add_profil("donovan", "maurice", "g", "26/09/1994") == False
         assert self.homeDatabase.add_profil("donovan", "maurice", "m", 1) == False
 
+        #test if method detect error during database connection
         with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
             mockedDatabaseConnection.return_value = False
 
@@ -731,6 +873,8 @@ class TestDatabaseInstaller:
 
                     assert self.homeDatabase.add_profil("donovan", "maurice", "m", "26/09/1994") == False
 
+
+        #test if method detect error during request execution
         with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
             mockedDatabaseConnection.return_value = True
 
@@ -744,6 +888,8 @@ class TestDatabaseInstaller:
 
                     assert self.homeDatabase.add_profil("donovan", "maurice", "m", "26/09/1994") == False
 
+
+        #test if method detect error durring getting lastrowId
         with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
             mockedDatabaseConnection.return_value = True
 
@@ -757,6 +903,8 @@ class TestDatabaseInstaller:
 
                     assert self.homeDatabase.add_profil("donovan", "maurice", "m", "26/09/1994") == False
 
+
+        #test if method detect error during committing change
         with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
             mockedDatabaseConnection.return_value = True
 
@@ -770,6 +918,8 @@ class TestDatabaseInstaller:
 
                     assert self.homeDatabase.add_profil("donovan", "maurice", "m", "26/09/1994") == False
 
+
+        #test if method detect new profil not found in profil list
         with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
             mockedDatabaseConnection.return_value = True
 
@@ -786,6 +936,12 @@ class TestDatabaseInstaller:
 
 
     def test_checking_config_file_existence(self):
+        """
+            1.test if method return an bool
+            2.test if method return true if succes
+            3.test if method return false if error
+        """
+        
         open_mock = mock_open()
         with patch("builtins.open", open_mock, create=False):
             #test if method return an bool 
@@ -801,6 +957,13 @@ class TestDatabaseInstaller:
 
 
     def test_checking_database_connection(self):
+        """
+            1.test if method return true if succes
+            2.test if method detect database error connection
+            3.test if method detect error during execution
+        """
+
+        #test if method return true if succes
         with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
             mockedDatabaseConnection.return_value = True
 
@@ -809,6 +972,8 @@ class TestDatabaseInstaller:
 
                 assert self.homeDatabase.check_database_connection() == True
 
+
+        #test if method detect database error connection
         with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.connect') as mockedDatabaseConnection:
             mockedDatabaseConnection.return_value = False
 

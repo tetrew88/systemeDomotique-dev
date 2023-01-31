@@ -554,9 +554,9 @@ class TestDatabaseInstaller:
 			7.test if method detect error during assignatting fixed usb port name to the controller
 			8.test if method detect error during creation of the home automation config file
 			9.test if method detect error while nginx config file creation
-			9.test if method detect error while creation of web interface supervisor config file
-			10.test if method detect error while creation of automation server supervisor config file
-			10.test if method detect error while setting of home automation system configuration booléean on True   
+			10.test if method detect error while creation of web interface supervisor config file
+			11.test if method detect error while creation of automation server supervisor config file
+			12.test if method detect error while setting of home automation system configuration booléean on True   
         """
 
         #test if method return true if succes
@@ -659,7 +659,7 @@ class TestDatabaseInstaller:
                                                 
                                                 assert self.systemInstaller.homeAutomationSystem_installation() == False
 
-        #...
+        #test if method detect error during nginx downloading
         with mock.patch('systemeDomotique.classes.installers.homeAutomationSystemInstaller.HomeAutomationSystemInstaller.dowload_supervisor') as supervisorDownload:
             supervisorDownload.return_value = True
 
@@ -692,7 +692,7 @@ class TestDatabaseInstaller:
                                                 
                                                 assert self.systemInstaller.homeAutomationSystem_installation() == False
 
-        #...
+        #test if method detect error while getting zwave controller path
         with mock.patch('systemeDomotique.classes.installers.homeAutomationSystemInstaller.HomeAutomationSystemInstaller.dowload_supervisor') as supervisorDownload:
             supervisorDownload.return_value = True
 
@@ -725,7 +725,7 @@ class TestDatabaseInstaller:
                                                 
                                                 assert self.systemInstaller.homeAutomationSystem_installation() == False
 
-        #...
+        #test if method detect error while getting zwave config folder path
         with mock.patch('systemeDomotique.classes.installers.homeAutomationSystemInstaller.HomeAutomationSystemInstaller.dowload_supervisor') as supervisorDownload:
             supervisorDownload.return_value = True
 
@@ -758,7 +758,7 @@ class TestDatabaseInstaller:
                                                 
                                                 assert self.systemInstaller.homeAutomationSystem_installation() == False
 
-        #...
+        #test if method detect error during assignatting fixed usb port name to the controller
         with mock.patch('systemeDomotique.classes.installers.homeAutomationSystemInstaller.HomeAutomationSystemInstaller.dowload_supervisor') as supervisorDownload:
             supervisorDownload.return_value = True
 
@@ -791,7 +791,7 @@ class TestDatabaseInstaller:
                                                 
                                                 assert self.systemInstaller.homeAutomationSystem_installation() == False
 
-        #...
+        #test if method detect error during creation of the home automation config file
         with mock.patch('systemeDomotique.classes.installers.homeAutomationSystemInstaller.HomeAutomationSystemInstaller.dowload_supervisor') as supervisorDownload:
             supervisorDownload.return_value = True
 
@@ -824,7 +824,7 @@ class TestDatabaseInstaller:
                                                 
                                                 assert self.systemInstaller.homeAutomationSystem_installation() == False
 
-        #...
+        #test if method detect error while nginx config file creation
         with mock.patch('systemeDomotique.classes.installers.homeAutomationSystemInstaller.HomeAutomationSystemInstaller.dowload_supervisor') as supervisorDownload:
             supervisorDownload.return_value = True
 
@@ -857,8 +857,7 @@ class TestDatabaseInstaller:
                                                 
                                                 assert self.systemInstaller.homeAutomationSystem_installation() == False
 
-
-        #...
+        #test if method detect error while creation of web interface supervisor config file
         with mock.patch('systemeDomotique.classes.installers.homeAutomationSystemInstaller.HomeAutomationSystemInstaller.dowload_supervisor') as supervisorDownload:
             supervisorDownload.return_value = True
 
@@ -891,7 +890,7 @@ class TestDatabaseInstaller:
                                                 
                                                 assert self.systemInstaller.homeAutomationSystem_installation() == False
 
-        #...
+        #test if method detect error while creation of automation server supervisor config file
         with mock.patch('systemeDomotique.classes.installers.homeAutomationSystemInstaller.HomeAutomationSystemInstaller.dowload_supervisor') as supervisorDownload:
             supervisorDownload.return_value = True
 
@@ -924,7 +923,7 @@ class TestDatabaseInstaller:
                                                 
                                                 assert self.systemInstaller.homeAutomationSystem_installation() == False
 
-        #...
+        #test if method detect error while setting of home automation system configuration booléean on True
         with mock.patch('systemeDomotique.classes.installers.homeAutomationSystemInstaller.HomeAutomationSystemInstaller.dowload_supervisor') as supervisorDownload:
             supervisorDownload.return_value = True
 
@@ -960,11 +959,18 @@ class TestDatabaseInstaller:
 
 
     def test_creating_administrator_user(self):
+        """
+            1.test if method return true if succes
+            2.test if method detect parametters error
+            3.test if method detect adding user error
+        """
+        #test if method return true if succes
         with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.add_user') as mockedAddingUser:
             mockedAddingUser.return_value = True
 
             assert self.systemInstaller.create_administrator_user("donovan", "maurice", "m", "26/09/1994", "admin", "inhabitant", "tetrew", "0000") == True
 
+        #test if method detect parametters error 
         with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.add_user') as mockedAddingUser:
             mockedAddingUser.return_value = True
 
@@ -1019,3 +1025,9 @@ class TestDatabaseInstaller:
             mockedAddingUser.return_value = True
 
             assert self.systemInstaller.create_administrator_user("donovan", "maurice", "m", "26/09/1994", "admin", "inhabitant", "tetrew", 8) == False
+
+        #test if method detect adding user error
+        with mock.patch('systemeDomotique.homeAutomationServer.classes.homeDatabase.HomeDatabase.add_user') as mockedAddingUser:
+            mockedAddingUser.return_value = False
+
+            assert self.systemInstaller.create_administrator_user("donovan", "maurice", "m", "26/09/1994", "admin", "inhabitant", "tetrew", "0000") == False
