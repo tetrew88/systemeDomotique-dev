@@ -1,0 +1,6 @@
+{
+    "zwaveControllerPath": "/dev/ttyACM0",
+    "assignedZwaveControllerPath": "/dev/ttyUSB_CONTROLLER",
+    "zWaveConfigFolderPath": "/home/pi/.local/lib/python3.7/site-packages/python_openzwave/ozw_config\n",
+    "systemConfigured": true
+}

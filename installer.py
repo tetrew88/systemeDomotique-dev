@@ -1,141 +1,136 @@
 #!/usr/bin/python3
 
-
 import os
 
 import mysql.connector
 
-from classes.installer import *
+import sys
 
+sys.path.append("..")
+
+from systemeDomotique.classes.installers.systemInstaller import *
 
 
 def install():
-	scriptPath = os.path.dirname(os.path.abspath(__file__))
-	installChoice = systemUserName = databaseName = systemUserPassword = ""
-	succes = databaseConfigured = databaseConnection = databaseCursor = False
-	data = {}
-	
+	"""
+		function used for install/configure the component of the automation system
 
-	installer = Installer(scriptPath)
-	#if user installer was lauch in sudo mode
+		functioning:
+			1.get user choice
+			2.install and configure database
+			3.install and configure home automation system
+			4.check installations succes
+			5.create administrator user
+			6.return succes
+
+		return:
+			if succes return true
+			else return false	
+	"""
+
+	scriptPath = os.path.dirname(os.path.abspath(__file__))
+	installChoice = ""
+	succes = databaseInstalled = homeAutomationSystemInstalled = False
+	administratorList = administratorUserCreated = False
+	administratorFirstName = administratorLastName = administratorGender = ""
+	administratorDateOfBirth = administratorIdentifiant = administratorPassword = ""
+	administratorGrade = "admin"
+	administratorRole = "inhabitant"
+	systemInstaller = SystemInstaller(scriptPath)
+
 	print("\n\nBienvenu dans l'installateur du système domotique.\n\n")
 
-	print("le système va télécharger les programmes et modules nécessaire\na son fonctionnement et vous demandera de remplir quelque informations")
+	print("le système va télécharger les programmes et modules nécessaire\n"\
+		"a son fonctionnement et vous demandera de remplir quelque informations")
 
-	installChoice = installer.get_install_choice()
+	#get user choice
+	installChoice = systemInstaller.get_install_choice()
 
-	if installChoice != False and installChoice == "o":
 
-		print("\n\ninstallation des programmes nécessaire au fonctionnement du système")
+	if installChoice == "o":
 		#database installation/configuration
-
-		"""download database system"""
-		print("\n\ntéléchargement du système de base de donnée")
-		installer.download_database_system()
-
-		print("\n\nconfiguration de la base de donnée")
-
-
-		"""setting database username"""
-		print("\n\nEntrer le nom d'uilisateur qui sera utiliser par le system.\nappuyer sur entrer pour utiliser le nom prédéfini (homeAutomationSystem)\n\n")
-
-		systemUserName = installer.get_system_username()
-
-		"""setting user password"""
-		print("\n\nenssuite le mot de passe du compte utilisateur system\n")
-		systemUserPassword = installer.get_system_user_password()
-
-		"""setting database name"""
-		print("\n\nfinisson avec le nom de la base de donnée.\nappuyer sur entrer pour utiliser le nom prédéfini (Home)\n\n")
-
-		databaseName = installer.get_database_name()
-
-
-		"""creating database config file"""
-		data = {}
-
-		data["userName"] = systemUserName
-		data["password"] = systemUserPassword
-		data["databaseName"] = databaseName
-
-		if installer.create_database_config_file(data):
-
-
-			"""database création"""
-			print("\n\ncréation de la base de donnée")
-			if installer.create_database(databaseName):
-				"""table creation"""
-
-				print("créations des tables")
-				if installer.create_database_table(databaseName):
-					"""user system creation"""
-
-					print("création de l'utilisateur system")
-					if installer.create_database_system_user(systemUserName, systemUserPassword):
-						#systeme user privilege attribution
-
-						print("attribution des droits a l'utilisateur system")
-						if installer.give_user_system_privilege(systemUserName, databaseName):
-							"""mysql test connexion"""
-
-							print("test de connexion a la base de donnee")
-							try:
-								databaseConnection = mysql.connector.connect(
-									host = "localHost",
-									user = systemUserName,
-									passwd = systemUserPassword,
-									database = databaseName
-								)
-								databaseCursor =  databaseConnection.cursor(buffered=True)
-							except:
-								databaseConnection = databaseCursor = False
-								print("erreur lord de la connexion a la base de donnée")
-
-							if databaseConnection != False and databaseCursor != False:
-								databaseConfigured = True
-								databaseConnection.close()
-
-							else:
-								databaseConfigured = False
-
-						else:
-							databaseConfigured = False
-
-					else:
-						databaseConfigured = False
-
-				else:
-					databaseConfigured = False
-
+		if systemInstaller.databaseConfigured == False:
+			print("\ninstallation/configuration de la base de donnée")
+			if systemInstaller.database_installation():
+				print("\nbase de donne configurer")
+				databaseInstalled = True
 			else:
-				databaseConfigured = False
-
+				print("\nerreur lors de la configuration de la base de donnée")
+				databaseInstalled = False
 		else:
-			databaseConfigured = False
-
-
-		if databaseConfigured == True:
-			print("\n\nBase de donnée configurer")
+				databaseInstalled = True
+			
+		if databaseInstalled:
+			if systemInstaller.homeAutomationSystemConfigured == False:
+				#home automation system installation/configuration
+				print("\ninstallation/configuration du système domotique")
+				if systemInstaller.homeAutomationSystem_installation():
+					print("\nsystème domotique configurer")
+					homeAutomationSystemInstalled = True
+				else:
+					print("\nerreur lors de la configuration du système domotique")
+					homeAutomationSystemInstalled = False
+			else:
+				homeAutomationSystemInstalled = True
 		else:
-			print("\n\nerreur lors de la configuration de la base de donnée")
+			homeAutomationSystemInstalled = False
 
-		if databaseConfigured == True and installer.check_database_config_file_existence():
+		#checking succes of installation
+		if databaseInstalled == True and homeAutomationSystemInstalled == True:
+			administratorList = systemInstaller.get_administrator_list()
+
+			if administratorList != False:
+				if len(administratorList) < 1:
+					#create administrator user
+					administratorFirstName = systemInstaller.get_administrator_first_name()
+					administratorLastName = systemInstaller.get_administrator_last_name()
+					administratorGender = systemInstaller.get_administrator_gender()
+					administratorDateOfBirth = systemInstaller.get_administrator_date_of_birth()
+					administratorIdentifiant = systemInstaller.get_administator_identifiant()
+					administratorPassword = systemInstaller.get_administrator_password()
+
+					if isinstance(administratorFirstName, str) == True\
+						and isinstance(administratorLastName, str)\
+						and isinstance(administratorDateOfBirth, str)\
+						and (administratorGender == "f" or administratorGender == "m")\
+						and administratorGrade == "admin"\
+						and administratorRole == "inhabitant"\
+						and isinstance(administratorIdentifiant, str)\
+						and isinstance(administratorPassword, str):
+
+						if systemInstaller.create_administrator_user(administratorFirstName, administratorLastName, administratorGender, administratorDateOfBirth, administratorGrade, administratorRole, administratorIdentifiant, administratorPassword):
+							administratorUserCreated = True
+						else:
+							administratorUserCreated = False
+					else:
+						administratorUserCreated = False
+				else:
+					administratorUserCreated = True
+			else:
+				administratorUserCreated = False
+		else:
+			administratorUserCreated = False
+
+		#checking if all is succesfull
+		if administratorUserCreated == True and databaseInstalled  == True and homeAutomationSystemInstalled == True:
 			succes = True
 		else:
 			succes = False
 
-
 		if succes:
-			print("\n\nsysteme installer")
+			print("\nl'installation s'est dérouler avec succes")
 		else:
-			print("\n\nerreur lors de l'installation")
-			if databaseConfigured == False:
-				print('i:erreur lors de la configuration de la base de donnée')
-			if installer.check_database_config_file_existence():
-				print("i:erreur lors de la création du fichier de configuration de la base de donnée")
-
+			print("\nune erreur s'est produite durrant l'installation")
+	
 	else:
-		pass
+		if installChoice == 'n':
+			print('\naurevoir')
+			succes = True
+		else:
+			succes = False
+
+	#return
+	return succes
 
 
 if __name__ == '__main__':

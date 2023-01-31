@@ -1,0 +1,6 @@
+[program:homeAutomationSystem]
+command = COMMAND
+user = USERNAME
+directory = PATH_TO_APPLICATION
+autostart = true
+autorestart = true
