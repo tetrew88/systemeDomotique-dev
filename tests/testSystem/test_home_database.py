@@ -8,12 +8,12 @@ import subprocess
 
 sys.path.append("..")
 
-from systemeDomotique.homeAutomationServer.classes.homeDatabase import *
-from systemeDomotique.homeAutomationServer.classes.users.profil import *
-from systemeDomotique.homeAutomationServer.classes.users.guest import *
-from systemeDomotique.homeAutomationServer.classes.users.inhabitant import *
-from systemeDomotique.homeAutomationServer.classes.users.user import *
-from systemeDomotique.homeAutomationServer.classes.users.administrator import *
+from systemeDomotique.classes.homeDatabase import *
+from systemeDomotique.classes.users.profil import *
+from systemeDomotique.classes.users.guest import *
+from systemeDomotique.classes.users.inhabitant import *
+from systemeDomotique.classes.users.user import *
+from systemeDomotique.classes.users.administrator import *
 
 from unittest.mock import patch, mock_open, MagicMock
 

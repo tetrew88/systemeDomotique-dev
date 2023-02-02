@@ -2,8 +2,8 @@ import sys
 
 sys.path.append("..")
 
-from systemeDomotique.homeAutomationServer.classes.users.guest import *
-from systemeDomotique.homeAutomationServer.classes.users.profil import *
+from systemeDomotique.classes.users.guest import *
+from systemeDomotique.classes.users.profil import *
 
 class Test_guest:
 
